@@ -2,6 +2,37 @@
 
 Plateforme de visioconférence médicale collaborative avec génération de rapports IA, conçue pour les équipes oncologiques.
 
+> **NexusCare / OncoCollab** — plateforme collaborative de téléconsultation et de RCP, avec le module externe **OncoVision** (visualiseur WSI) et le référentiel **OLGA**.
+> Documents de recette : [`RECETTE_US.md`](RECETTE_US.md) (28 US), [`PROGRAMME_DEMO.md`](PROGRAMME_DEMO.md) (déroulé de démo), [`AUDIT_NEXUSCARE.md`](AUDIT_NEXUSCARE.md) (audit technique).
+
+---
+
+## Démarrage rapide (Windows + Docker Desktop)
+
+1. Copier `.env.example` en `.env` et renseigner au minimum `JWT_SECRET` (chaîne aléatoire longue), `GEMINI_API_KEY` et/ou `GROQ_API_KEY` pour l'IA.
+2. Lancer Docker Desktop, puis double-cliquer `scripts\dev-up.bat` (build normal).
+   Si le réseau bloque Docker Hub / npm (DNS du routeur), utiliser `scripts\dev-up-dns.bat` (override `docker-compose.local-dns.yml`, sans rebuild).
+3. Ouvrir https://localhost:5173 (certificat auto-signé à accepter une fois).
+4. Après une modification du code backend/websocket : `scripts\dev-restart.bat` (les volumes montés depuis Windows ne déclenchent pas le rechargement dans les conteneurs). `scripts\dev-status.bat` et `scripts\dev-diag.bat` produisent des logs dans `scripts\logs\`.
+
+**Comptes de démo (développement uniquement)** : `sophie.martin@oncocollab.fr` / `password123` (idem jean.dupont, marie.lefevre, paul.bernard) ; administrateur : `admin@oncocollab.fr` / `admin123`.
+
+### Sécurité
+
+- Authentification par jeton JWT (HS256, `JWT_SECRET`, durée `JWT_EXPIRES_IN_SEC`, 8 h par défaut) sur l'API REST **et** sur le WebSocket.
+- Garde globale : toute route est protégée sauf celles marquées `@Public()` ; `@AdminOnly()` pour l'administration.
+- Droits par ressource : administrateur de réunion, créateur de groupe, propriétaire de profil.
+- CORS restreint (localhost + liste `CORS_ORIGINS`). En production, `JWT_SECRET` est obligatoire et les données de démo ne sont pas créées.
+- Limites connues : les fichiers servis sous `/uploads` ne sont pas authentifiés ; la lecture des messages d'une salle n'est pas encore restreinte à ses membres.
+
+### IA : Groq + Gemini
+
+La transcription utilise Whisper (via Groq) et la structuration du rapport utilise Gemini, avec Groq en repli. Les deux clés sont lues depuis `.env`.
+
+### Administration
+
+Page `/admin` (visible pour les comptes administrateurs) : spécialités, utilisateurs et rôles, groupes.
+
 ---
 
 ## Architecture

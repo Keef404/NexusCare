@@ -96,8 +96,8 @@ export class MeetingsController {
     }
 
     @Get(':id/patient-records')
-    getPatientRecords(@Param('id') id: string) {
-        return this.meetingsService.getPatientRecordsForMeeting(id);
+    getPatientRecords(@Param('id') id: string, @CurrentUser() me: AuthUser) {
+        return this.meetingsService.getPatientRecordsForMeeting(id, me);
     }
 
     @Patch(':id/start')

@@ -226,7 +226,7 @@ services:
     build:
       context: ./Completion_formulaire
       dockerfile: DockerFile
-    container_name: oncocollab-comqpletion-formulaire-dev
+    container_name: oncocollab-completion-formulaire-dev
     restart: unless-stopped
     ports:
       - "8001:8001"

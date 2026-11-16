@@ -419,7 +419,11 @@ export class MeetingsService {
         return meeting.participants.map(serializeMeetingParticipant);
     }
 
-    async getPatientRecordsForMeeting(meetingId: string) {
+    /**
+     * US-17 : dossiers remplis par les participants. Le dossier d'un participant masqué (isVisible = false)
+     * n'est visible que par lui-même, l'administrateur de la réunion et les administrateurs plateforme.
+     */
+    async getPatientRecordsForMeeting(meetingId: string, requester?: { id: string; isAdmin: boolean }) {
         const meeting = await this.prisma.meeting.findUnique({
             where: { id: meetingId },
             include: {
@@ -436,7 +440,10 @@ export class MeetingsService {
         if (!meeting) {
             throw new NotFoundException(`Meeting with ID ${meetingId} not found`);
         }
-        return meeting.participants.map(p => ({
+        const canSeeHidden = !requester || requester.isAdmin || meeting.roomAdminId === requester.id;
+        return meeting.participants
+            .filter(p => p.isVisible || canSeeHidden || p.userId === requester?.id)
+            .map(p => ({
             user: p.user ? serializeUser(p.user) : p.userId,
             profession: p.profession ? serializeProfession(p.profession) : p.professionId,
             patientRecord: p.patientRecord ? serializePatientRecord(p.patientRecord) : null,
