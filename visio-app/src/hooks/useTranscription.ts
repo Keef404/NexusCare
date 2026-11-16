@@ -75,7 +75,8 @@ export function useTranscription() {
   const [wsStatus, setWsStatus] = useState<WsStatus>('disconnected');
   const [error, setError] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [engine, setEngine] = useState<Engine>('groq');
+  // Sans clé Groq côté navigateur, on utilise Whisper local (service transcription-api) : gratuit et sans clé exposée.
+  const [engine, setEngine] = useState<Engine>(GROQ_API_KEY ? 'groq' : 'whisper');
   const [statSent, setStatSent] = useState(0);
   const [statDone, setStatDone] = useState(0);
 

@@ -17,3 +17,4 @@ olga/config/apiKey.json
 UserswaterNexusCarecertskey.pem
 *.pem
 scripts/logs/
+*.bundle
