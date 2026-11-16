@@ -26,7 +26,6 @@ export function serializeUser(user: any) {
     lastName: user.lastName,
     profession: user.profession ? serializeProfession(user.profession) : user.professionId,
     isAdmin: user.isAdmin,
-    password: user.password,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

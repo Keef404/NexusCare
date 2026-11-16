@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { api } from '../services/api';
 import {
+import { getToken } from '../services/auth';
     MessageSquare,
     Users,
     Plus,
@@ -91,6 +92,7 @@ const Chat: React.FC = () => {
     // Connect socket on mount
     useEffect(() => {
         const socket = io(SERVER_URL, {
+            auth: { token: getToken() },
             transports: ['polling', 'websocket'],
             extraHeaders: { "ngrok-skip-browser-warning": "true" },
         });

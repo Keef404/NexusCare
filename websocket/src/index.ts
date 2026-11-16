@@ -7,19 +7,17 @@ import cors from 'cors';
 import * as fs from 'fs';
 import { ClientToServerEvents, ServerToClientEvents } from './types';
 import { saveMessage, getMessagesForRoom } from './services/db.service';
+import { verifyToken, isOriginAllowed } from './auth';
 
 type AppSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const app = express();
 
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,POST');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    next();
-});
-
-app.use(cors({ origin: "*" }));
+app.use(cors({
+    origin: (origin, cb) => cb(null, isOriginAllowed(origin)),
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 // Vérifier si les certificats SSL existent
 const certPath = '/app/certs/cert.pem';
@@ -42,9 +40,17 @@ if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
 
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
     cors: {
-        origin: "*",
+        origin: (origin, cb) => cb(null, isOriginAllowed(origin)),
         methods: ["GET", "POST"]
     }
+});
+
+// Authentification : le client doit fournir le JWT émis par rest-api (handshake.auth.token).
+io.use((socket, next) => {
+    const user = verifyToken(socket.handshake.auth?.token as string | undefined);
+    if (!user) return next(new Error('unauthorized'));
+    (socket.data as any).user = user;
+    next();
 });
 
 io.on('connection', (socket: AppSocket) => {
@@ -111,7 +117,9 @@ io.on('connection', (socket: AppSocket) => {
         socket.leave(roomId);
     });
 
-    socket.on('send-chat-message', async (content, roomId, senderId) => {
+    socket.on('send-chat-message', async (content, roomId, _senderIdFromClient) => {
+        // L'identité de l'expéditeur vient du jeton, jamais du client (anti-usurpation).
+        const senderId: string = (socket.data as any).user.id;
         console.log(`[CHAT] Message de ${senderId} dans room ${roomId}: ${content}`);
 
         try {

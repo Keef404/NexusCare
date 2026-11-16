@@ -5,6 +5,7 @@ import { MeetingsService } from './meetings.service';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { UpdateMeetingDto } from './dto/update-meeting.dto';
 import { MarkFormFilledDto } from './dto/add-patient-record.dto';
+import { AdminOnly } from '../auth/decorators';
 
 @Controller('meetings')
 export class MeetingsController {
@@ -31,6 +32,7 @@ export class MeetingsController {
     }
 
     @Post('repair-collaboration-ids')
+    @AdminOnly()
     repairCollaborationIds() {
         return this.meetingsService.repairCollaborationIds();
     }

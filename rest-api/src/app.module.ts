@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { AuthGuard } from './auth/auth.guard';
+import { StripSensitiveInterceptor } from './common/strip-sensitive.interceptor';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -35,6 +38,10 @@ import { FormsModule } from './forms/forms.module';
     FormsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_INTERCEPTOR, useClass: StripSensitiveInterceptor },
+  ],
 })
 export class AppModule {}

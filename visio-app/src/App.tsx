@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { CookiesProvider } from 'react-cookie';
 import React from 'react';
 import { RestProvider } from './oncovision/RestProvider';
+import { getToken } from './services/auth';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -31,7 +32,7 @@ if (storedUser) {
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const user = localStorage.getItem('user');
-  if (!user) {
+  if (!user || !getToken()) {
     return <Navigate to="/login" replace />;
   }
   return <>{children}</>;

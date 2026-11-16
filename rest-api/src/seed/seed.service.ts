@@ -9,9 +9,15 @@ export class SeedService implements OnModuleInit {
     async onModuleInit() {
         console.log('🌱 Vérification des données de démo...');
         await this.seedProfessions();
-        await this.seedUsers();
-        await this.seedPatientRecords();
-        await this.seedMeetings();
+        // Comptes/dossiers/réunions de démo (mots de passe connus) : jamais en production.
+        const demoAllowed = process.env.NODE_ENV !== 'production' && process.env.SEED_DEMO_DATA !== 'false';
+        if (demoAllowed) {
+            await this.seedUsers();
+            await this.seedPatientRecords();
+            await this.seedMeetings();
+        } else {
+            console.log('ℹ️ Données de démo désactivées (production ou SEED_DEMO_DATA=false)');
+        }
         console.log('✅ Données de démo vérifiées/créées');
     }
 

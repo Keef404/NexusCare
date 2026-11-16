@@ -4,6 +4,7 @@ import { ClientToServerEvents, ServerToClientEvents } from '../types/socket';
 import { api } from '../src/services/api';
 import ReportGeneratorModal from './ReportGeneratorModal';
 import CollaborativeAnnotation from '../src/oncovision/components/CollaborativeAnnotation';
+import { getToken } from '../src/services/auth';
 
 type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
@@ -423,6 +424,7 @@ const VideoCall: React.FC<VideoCallProps> = ({ onLeave, initialMicOn = true, ini
     const roomId = meetingId || 'default-room';
     const streamPromise = getMedia();
     const socket = io(SERVER_URL, {
+      auth: { token: getToken() },
       transports: ['polling', 'websocket'],
       extraHeaders: {
         "ngrok-skip-browser-warning": "true"

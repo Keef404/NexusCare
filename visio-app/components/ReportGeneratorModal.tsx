@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { authFetch } from '../src/services/auth';
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
@@ -97,7 +98,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({ isOpen, onC
             form.append('whisper_model', 'small');
             form.append('language', 'fr');
 
-            const res = await fetch(`${API_URL}/ai/transcribe`, { method: 'POST', body: form });
+            const res = await authFetch(`${API_URL}/ai/transcribe`, { method: 'POST', body: form });
             if (!res.ok) {
                 const err = await res.json().catch(() => ({ detail: res.statusText }));
                 throw new Error(err.detail || 'Transcription échouée');
@@ -122,7 +123,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({ isOpen, onC
             const textToSend = mode === 'text' ? manualText : transcription;
             if (!textToSend?.trim()) throw new Error('Aucun texte à envoyer');
 
-            const res = await fetch(`${API_URL}/ai/generate/text`, {
+            const res = await authFetch(`${API_URL}/ai/generate/text`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: textToSend, meeting_type: 'medical' }),

@@ -10,7 +10,7 @@ export class UsersService {
     constructor(private prisma: PrismaService) {}
 
     async create(createUserDto: CreateUserDto) {
-        createUserDto.password = await argon2.hash(createUserDto.password);
+        const passwordHash = await argon2.hash(createUserDto.password);
         const user = await this.prisma.user.create({
             data: {
                 email: createUserDto.email,
@@ -18,7 +18,7 @@ export class UsersService {
                 lastName: createUserDto.lastName,
                 professionId: createUserDto.profession,
                 isAdmin: createUserDto.isAdmin ?? false,
-                password: createUserDto.password,
+                password: passwordHash,
             },
             include: { profession: true },
         });
@@ -48,6 +48,14 @@ export class UsersService {
         return serializeUser(user);
     }
 
+    /** Usage interne (authentification uniquement) : retourne l'enregistrement brut AVEC le hash. */
+    async findByEmailWithPassword(email: string) {
+        return this.prisma.user.findUnique({
+            where: { email },
+            include: { profession: true },
+        });
+    }
+
     async update(id: string, updateUserDto: UpdateUserDto) {
         const user = await this.prisma.user.update({
             where: { id },
@@ -57,6 +65,7 @@ export class UsersService {
                 ...(updateUserDto.lastName && { lastName: updateUserDto.lastName }),
                 ...(updateUserDto.profession && { professionId: updateUserDto.profession }),
                 ...(updateUserDto.isAdmin !== undefined && { isAdmin: updateUserDto.isAdmin }),
+                ...(updateUserDto.password && { password: await argon2.hash(updateUserDto.password) }),
             },
             include: { profession: true },
         });
@@ -64,6 +73,7 @@ export class UsersService {
     }
 
     async remove(id: string) {
-        return this.prisma.user.delete({ where: { id } });
+        await this.prisma.user.delete({ where: { id } });
+        return { id, deleted: true };
     }
 }

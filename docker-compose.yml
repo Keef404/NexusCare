@@ -124,6 +124,8 @@ services:
       FORM_COMPLETION_API_URL: http://completion-formulaire:8001
       TRANSCRIPTION_WS_URL: ws://transcription-api:8000
       ONCOVISION_API_URL: http://oncovision-api:8000
+      JWT_SECRET: ${JWT_SECRET:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -152,6 +154,8 @@ services:
       DATABASE_URL: postgresql://admin:password123@postgres:5432/oncocollab
       REDIS_URL: redis://redis:6379
       API_URL: ${API_URL:-http://rest-api:3000}
+      JWT_SECRET: ${JWT_SECRET:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -199,7 +203,6 @@ services:
       - ./visio-app/vite.config.ts:/app/vite.config.ts
       - ./OncoVision/app/src:/app/oncovision-src
       - /app/node_modules
-
   generation_rapport:
     build:
       context: ./generation_rapport
@@ -231,7 +234,6 @@ services:
       LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
-      # Gardé pour pouvoir repasser sur Ollama via LLM_PROVIDER=ollama
       OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral}
     extra_hosts:
@@ -285,16 +287,18 @@ services:
     networks:
       - oncocollab-network
 
-  # =====================
-  # Olga Services
-  # =====================
   olga-mysql:
     image: mysql:latest
     container_name: olga-mysql
     env_file:
       - ./olga/.env.mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: olga
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin123
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - olga_mysql_data:/var/lib/mysql
     restart: unless-stopped
@@ -314,7 +318,7 @@ services:
     environment:
       PMA_HOST: olga-mysql
       PMA_USER: root
-      PMA_PASSWORD: rootpassword
+      PMA_PASSWORD: root
     depends_on:
       olga-mysql:
         condition: service_healthy

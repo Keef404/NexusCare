@@ -1,3 +1,4 @@
+import { authFetch } from './auth';
 const API_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000`;
 
 export interface FormCompletionFieldInput {
@@ -14,7 +15,7 @@ export interface FormCompletionResponse {
 
 export const api = {
     login: async (email: string, password: string) => {
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const response = await authFetch(`${API_URL}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
@@ -32,7 +33,7 @@ export const api = {
     },
 
     register: async (userData: any) => {
-        const response = await fetch(`${API_URL}/auth/register`, {
+        const response = await authFetch(`${API_URL}/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(userData),
@@ -49,25 +50,25 @@ export const api = {
     },
 
     getProfessions: async () => {
-        const response = await fetch(`${API_URL}/professions`);
+        const response = await authFetch(`${API_URL}/professions`);
         if (!response.ok) throw new Error('Failed to fetch professions');
         return response.json();
     },
 
     getPatientRecords: async () => {
-        const response = await fetch(`${API_URL}/patient-records`);
+        const response = await authFetch(`${API_URL}/patient-records`);
         if (!response.ok) throw new Error("Failed to fetch patient records");
         return response.json();
     },
 
     getPatientRecord: async (id: string) => {
-        const response = await fetch(`${API_URL}/patient-records/${id}`);
+        const response = await authFetch(`${API_URL}/patient-records/${id}`);
         if (!response.ok) throw new Error("Failed to fetch patient record");
         return response.json();
     },
 
     createPatientRecord: async (data: any) => {
-        const response = await fetch(`${API_URL}/patient-records`, {
+        const response = await authFetch(`${API_URL}/patient-records`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -80,7 +81,7 @@ export const api = {
     },
 
     updatePatientRecord: async (id: string, data: any) => {
-        const response = await fetch(`${API_URL}/patient-records/${id}`, {
+        const response = await authFetch(`${API_URL}/patient-records/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -90,7 +91,7 @@ export const api = {
     },
 
     deletePatientRecord: async (id: string) => {
-        const response = await fetch(`${API_URL}/patient-records/${id}`, {
+        const response = await authFetch(`${API_URL}/patient-records/${id}`, {
             method: "DELETE",
         });
         if (!response.ok) throw new Error("Failed to delete patient record");
@@ -98,37 +99,37 @@ export const api = {
     },
 
     getMeetings: async () => {
-        const response = await fetch(`${API_URL}/meetings`);
+        const response = await authFetch(`${API_URL}/meetings`);
         if (!response.ok) throw new Error("Failed to fetch meetings");
         return response.json();
     },
 
     getMeeting: async (id: string) => {
-        const response = await fetch(`${API_URL}/meetings/${id}`);
+        const response = await authFetch(`${API_URL}/meetings/${id}`);
         if (!response.ok) throw new Error("Failed to fetch meeting");
         return response.json();
     },
 
     getMeetingByRoomId: async (roomId: string) => {
-        const response = await fetch(`${API_URL}/meetings/room/${roomId}`);
+        const response = await authFetch(`${API_URL}/meetings/room/${roomId}`);
         if (!response.ok) throw new Error("Failed to fetch meeting");
         return response.json();
     },
 
     getPendingMeetings: async () => {
-        const response = await fetch(`${API_URL}/meetings/pending`);
+        const response = await authFetch(`${API_URL}/meetings/pending`);
         if (!response.ok) throw new Error("Failed to fetch pending meetings");
         return response.json();
     },
 
     getMeetingsByParticipant: async (participantId: string) => {
-        const response = await fetch(`${API_URL}/meetings/participant/${participantId}`);
+        const response = await authFetch(`${API_URL}/meetings/participant/${participantId}`);
         if (!response.ok) throw new Error("Failed to fetch meetings");
         return response.json();
     },
 
     createMeeting: async (data: any) => {
-        const response = await fetch(`${API_URL}/meetings`, {
+        const response = await authFetch(`${API_URL}/meetings`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -141,7 +142,7 @@ export const api = {
         const url = requesterId 
             ? `${API_URL}/meetings/${id}?requesterId=${requesterId}`
             : `${API_URL}/meetings/${id}`;
-        const response = await fetch(url, {
+        const response = await authFetch(url, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -151,7 +152,7 @@ export const api = {
     },
 
     deleteMeeting: async (id: string) => {
-        const response = await fetch(`${API_URL}/meetings/${id}`, {
+        const response = await authFetch(`${API_URL}/meetings/${id}`, {
             method: "DELETE",
         });
         if (!response.ok) throw new Error("Failed to delete meeting");
@@ -159,7 +160,7 @@ export const api = {
     },
 
     markFormFilled: async (meetingId: string, participantId: string, patientRecordId: string) => {
-        const response = await fetch(`${API_URL}/meetings/${meetingId}/form-filled`, {
+        const response = await authFetch(`${API_URL}/meetings/${meetingId}/form-filled`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ participantId, patientRecordId }),
@@ -169,25 +170,25 @@ export const api = {
     },
 
     getMeetingPatient: async (meetingId: string) => {
-        const response = await fetch(`${API_URL}/meetings/${meetingId}/patient`);
+        const response = await authFetch(`${API_URL}/meetings/${meetingId}/patient`);
         if (!response.ok) throw new Error("Failed to fetch meeting patient");
         return response.json();
     },
 
     getMeetingParticipantsStatus: async (meetingId: string) => {
-        const response = await fetch(`${API_URL}/meetings/${meetingId}/participants-status`);
+        const response = await authFetch(`${API_URL}/meetings/${meetingId}/participants-status`);
         if (!response.ok) throw new Error("Failed to fetch participants status");
         return response.json();
     },
 
     getMeetingPatientRecords: async (meetingId: string) => {
-        const response = await fetch(`${API_URL}/meetings/${meetingId}/patient-records`);
+        const response = await authFetch(`${API_URL}/meetings/${meetingId}/patient-records`);
         if (!response.ok) throw new Error("Failed to fetch patient records");
         return response.json();
     },
 
     startMeeting: async (id: string) => {
-        const response = await fetch(`${API_URL}/meetings/${id}/start`, {
+        const response = await authFetch(`${API_URL}/meetings/${id}/start`, {
             method: "PATCH",
         });
         if (!response.ok) throw new Error("Failed to start meeting");
@@ -195,7 +196,7 @@ export const api = {
     },
 
     completeMeeting: async (id: string) => {
-        const response = await fetch(`${API_URL}/meetings/${id}/complete`, {
+        const response = await authFetch(`${API_URL}/meetings/${id}/complete`, {
             method: "PATCH",
         });
         if (!response.ok) throw new Error("Failed to complete meeting");
@@ -203,7 +204,7 @@ export const api = {
     },
 
     cancelMeeting: async (id: string) => {
-        const response = await fetch(`${API_URL}/meetings/${id}/cancel`, {
+        const response = await authFetch(`${API_URL}/meetings/${id}/cancel`, {
             method: "PATCH",
         });
         if (!response.ok) throw new Error("Failed to cancel meeting");
@@ -211,19 +212,19 @@ export const api = {
     },
 
     getUsers: async () => {
-        const response = await fetch(`${API_URL}/users`);
+        const response = await authFetch(`${API_URL}/users`);
         if (!response.ok) throw new Error("Failed to fetch users");
         return response.json();
     },
 
     getUser: async (id: string) => {
-        const response = await fetch(`${API_URL}/users/${id}`);
+        const response = await authFetch(`${API_URL}/users/${id}`);
         if (!response.ok) throw new Error("Failed to fetch user");
         return response.json();
     },
 
     updateUser: async (id: string, data: any) => {
-        const response = await fetch(`${API_URL}/users/${id}`, {
+        const response = await authFetch(`${API_URL}/users/${id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -233,13 +234,13 @@ export const api = {
     },
 
     getMessages: async (roomId: string) => {
-        const response = await fetch(`${API_URL}/messages/room/${encodeURIComponent(roomId)}`);
+        const response = await authFetch(`${API_URL}/messages/room/${encodeURIComponent(roomId)}`);
         if (!response.ok) throw new Error("Failed to fetch messages");
         return response.json();
     },
 
     addParticipantToMeeting: async (meetingId: string, participantId: string, professionId: string) => {
-        const response = await fetch(`${API_URL}/meetings/${meetingId}/participants`, {
+        const response = await authFetch(`${API_URL}/meetings/${meetingId}/participants`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ participantId, professionId }),
@@ -249,7 +250,7 @@ export const api = {
     },
 
     removeParticipantFromMeeting: async (meetingId: string, participantId: string) => {
-        const response = await fetch(`${API_URL}/meetings/${meetingId}/participants/${participantId}`, {
+        const response = await authFetch(`${API_URL}/meetings/${meetingId}/participants/${participantId}`, {
             method: "DELETE",
         });
         if (!response.ok) throw new Error("Failed to remove participant");
@@ -258,19 +259,19 @@ export const api = {
 
     // Groups
     getGroupsByUser: async (userId: string) => {
-        const response = await fetch(`${API_URL}/groups/user/${userId}`);
+        const response = await authFetch(`${API_URL}/groups/user/${userId}`);
         if (!response.ok) throw new Error("Failed to fetch groups");
         return response.json();
     },
 
     getGroup: async (id: string) => {
-        const response = await fetch(`${API_URL}/groups/${id}`);
+        const response = await authFetch(`${API_URL}/groups/${id}`);
         if (!response.ok) throw new Error("Failed to fetch group");
         return response.json();
     },
 
     createGroup: async (data: { name: string; createdById: string; memberIds: string[] }) => {
-        const response = await fetch(`${API_URL}/groups`, {
+        const response = await authFetch(`${API_URL}/groups`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -280,7 +281,7 @@ export const api = {
     },
 
     addGroupMember: async (groupId: string, userId: string) => {
-        const response = await fetch(`${API_URL}/groups/${groupId}/members/${userId}`, {
+        const response = await authFetch(`${API_URL}/groups/${groupId}/members/${userId}`, {
             method: "POST",
         });
         if (!response.ok) throw new Error("Failed to add group member");
@@ -288,7 +289,7 @@ export const api = {
     },
 
     removeGroupMember: async (groupId: string, userId: string) => {
-        const response = await fetch(`${API_URL}/groups/${groupId}/members/${userId}`, {
+        const response = await authFetch(`${API_URL}/groups/${groupId}/members/${userId}`, {
             method: "DELETE",
         });
         if (!response.ok) throw new Error("Failed to remove group member");
@@ -296,13 +297,13 @@ export const api = {
     },
 
     getFormById: async (id: string) => {
-        const response = await fetch(`${API_URL}/forms/${id}`);
+        const response = await authFetch(`${API_URL}/forms/${id}`);
         if (!response.ok) return null;
         return response.json();
     },
 
     extractFormFromTranscript: async (payload: { form: { fields: FormCompletionFieldInput[] }; text: string }): Promise<FormCompletionResponse> => {
-        const response = await fetch(`${API_URL}/forms/extract`, {
+        const response = await authFetch(`${API_URL}/forms/extract`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -321,7 +322,7 @@ export const api = {
     },
 
     ensureCollaborationRoom: async (meetingId: string): Promise<{ collaborationId: string } | null> => {
-        const response = await fetch(`${API_URL}/meetings/${meetingId}/ensure-collaboration-room`, {
+        const response = await authFetch(`${API_URL}/meetings/${meetingId}/ensure-collaboration-room`, {
             method: 'POST',
         }).catch(() => null);
         if (!response?.ok) return null;
@@ -331,7 +332,7 @@ export const api = {
     uploadDicomToMeeting: async (meetingId: string, file: File): Promise<{ imageId: string }> => {
         const formData = new FormData();
         formData.append('file', file);
-        const response = await fetch(`${API_URL}/meetings/${meetingId}/dicom`, { method: 'POST', body: formData });
+        const response = await authFetch(`${API_URL}/meetings/${meetingId}/dicom`, { method: 'POST', body: formData });
         if (!response.ok) {
             const body = await response.json().catch(() => ({}));
             throw new Error(body.message || 'DICOM upload to OncoVision failed');
@@ -342,7 +343,7 @@ export const api = {
     uploadPatientFile: async (file: File): Promise<{ url: string; originalName: string }> => {
         const formData = new FormData();
         formData.append('file', file);
-        const response = await fetch(`${API_URL}/patient-records/upload`, { method: 'POST', body: formData });
+        const response = await authFetch(`${API_URL}/patient-records/upload`, { method: 'POST', body: formData });
         if (!response.ok) throw new Error('Upload échoué');
         return response.json();
     },

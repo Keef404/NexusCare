@@ -27,8 +27,12 @@ async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { httpsOptions });
   app.useStaticAssets(uploadsDir, { prefix: '/uploads' });
+  // CORS : localhost/127.0.0.1 (dev) + origines listées dans CORS_ORIGINS (séparées par des virgules).
+  const extraOrigins = (process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
+  const localOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
   app.enableCors({
-    origin: '*',
+    origin: (origin, cb) => cb(null, !origin || localOrigin.test(origin) || extraOrigins.includes(origin)),
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   
