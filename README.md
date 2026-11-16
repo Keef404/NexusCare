@@ -27,7 +27,7 @@ Plateforme de visioconférence médicale collaborative avec génération de rapp
 
 ### IA : Groq + Gemini
 
-La transcription utilise Whisper (via Groq) et la structuration du rapport utilise Gemini, avec Groq en repli. Les deux clés sont lues depuis `.env`.
+Gemini structure le rapport médical (`GEMINI_API_KEY`) ; Groq/Whisper sert à la transcription audio et à la complétion automatique du formulaire (`GROQ_API_KEY`). Les deux clés sont lues depuis `.env`.
 
 ### Administration
 
