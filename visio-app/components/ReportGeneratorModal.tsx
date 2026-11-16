@@ -8,11 +8,12 @@ const API_URL =
 type Step = 'idle' | 'recording' | 'recorded' | 'transcribing' | 'generating' | 'done' | 'error';
 
 interface ReportGeneratorModalProps {
+    meetingId?: string;
     isOpen: boolean;
     onClose: () => void;
 }
 
-const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({ isOpen, onClose }) => {
+const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({ isOpen, onClose, meetingId }) => {
     const [step, setStep] = useState<Step>('idle');
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -353,7 +354,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({ isOpen, onC
                             <div className="flex gap-3">
                                 <a
                                     href={pdfUrl}
-                                    download="rapport_reunion.pdf"
+                                    download={`rapport_${meetingId ?? 'reunion'}.pdf`}
                                     className="px-5 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-sm font-medium flex items-center gap-2"
                                 >
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

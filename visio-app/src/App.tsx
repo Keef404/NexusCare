@@ -3,6 +3,7 @@ import { CookiesProvider } from 'react-cookie';
 import React from 'react';
 import { RestProvider } from './oncovision/RestProvider';
 import { getToken } from './services/auth';
+import LogoutButton from './components/LogoutButton';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -35,7 +36,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (!user || !getToken()) {
     return <Navigate to="/login" replace />;
   }
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <LogoutButton />
+    </>
+  );
 }
 
 export default function App() {

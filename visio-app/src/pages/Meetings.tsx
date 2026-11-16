@@ -20,6 +20,9 @@ import {
     Edit2,
     Save,
     RefreshCw,
+    Eye,
+    EyeOff,
+    Tag,
 } from 'lucide-react';
 
 interface Meeting {
@@ -286,6 +289,28 @@ const Meetings: React.FC = () => {
             setDetailsError(error.message || 'Erreur lors de la sauvegarde');
         } finally {
             setDetailsSaving(false);
+        }
+    };
+
+    // US-08 : l'administrateur de la réunion règle la visibilité d'un participant et l'affichage de sa spécialité
+    const handleToggleParticipant = async (
+        participantUserId: string,
+        patch: { isVisible?: boolean; showProfession?: boolean },
+        current: { isVisible: boolean; showProfession: boolean },
+    ) => {
+        if (!selectedMeeting || !user || !participantUserId) return;
+        try {
+            await api.updateParticipantVisibility(
+                selectedMeeting.id,
+                participantUserId,
+                patch.isVisible ?? current.isVisible,
+                patch.showProfession ?? current.showProfession,
+            );
+            const updatedMeetings = await api.getMeetingsByParticipant(user.id);
+            setMeetings(updatedMeetings);
+            setSelectedMeeting(updatedMeetings.find((m: any) => m.id === selectedMeeting.id) ?? selectedMeeting);
+        } catch (error: any) {
+            setDetailsError(error.message || 'Erreur lors de la mise à jour de la visibilité');
         }
     };
 
@@ -844,6 +869,28 @@ const Meetings: React.FC = () => {
                                                     {p.formFilled && <CheckCircle className="w-3 h-3" />}
                                                     {p.user?.firstName || p.user?.fistName} {p.user?.lastName}
                                                     {p.showProfession && p.profession?.name && ` (${p.profession.name})`}
+                                                    {isAdmin(selectedMeeting) && (
+                                                        <>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleToggleParticipant(p.user?.id, { isVisible: !p.isVisible }, p)}
+                                                                title={p.isVisible ? 'Masquer ce participant' : 'Afficher ce participant'}
+                                                                aria-label={p.isVisible ? 'Masquer ce participant' : 'Afficher ce participant'}
+                                                                className="ml-1 opacity-70 hover:opacity-100 cursor-pointer"
+                                                            >
+                                                                {p.isVisible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleToggleParticipant(p.user?.id, { showProfession: !p.showProfession }, p)}
+                                                                title={p.showProfession ? 'Masquer la spécialité' : 'Afficher la spécialité'}
+                                                                aria-label={p.showProfession ? 'Masquer la spécialité' : 'Afficher la spécialité'}
+                                                                className={`opacity-70 hover:opacity-100 cursor-pointer ${p.showProfession ? 'text-cyan-300' : ''}`}
+                                                            >
+                                                                <Tag className="w-3 h-3" />
+                                                            </button>
+                                                        </>
+                                                    )}
                                                 </span>
                                             ))}
                                         </div>

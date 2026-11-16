@@ -3,6 +3,8 @@ import { useTranscription, Engine } from '../src/hooks/useTranscription';
 
 interface TranscriptionPanelProps {
   onTranscriptChange?: (text: string) => void;
+  /** Identifiant de la réunion, utilisé pour nommer le fichier exporté. */
+  meetingId?: string;
 }
 
 const WAVE_BARS = Array.from({ length: 24 }, (_, i) => ({
@@ -11,7 +13,7 @@ const WAVE_BARS = Array.from({ length: 24 }, (_, i) => ({
   delay: i * 0.03,
 }));
 
-const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({ onTranscriptChange }) => {
+const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({ onTranscriptChange, meetingId }) => {
   const {
     isRecording,
     transcript,
@@ -29,6 +31,19 @@ const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({ onTranscriptCha
   } = useTranscription();
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // US-22 : export de la transcription en texte brut
+  const exportTxt = () => {
+    const blob = new Blob([transcript], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transcription_${meetingId ?? 'reunion'}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -165,6 +180,20 @@ const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({ onTranscriptCha
             </>
           )}
         </button>
+        {transcript && (
+          <button
+            onClick={exportTxt}
+            className="px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 transition-all"
+            title="Exporter la transcription (.txt)"
+            aria-label="Exporter la transcription en texte brut"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </button>
+        )}
         {transcript && !isRecording && (
           <button
             onClick={clearTranscript}

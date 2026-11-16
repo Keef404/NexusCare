@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, ServerToClientEvents } from '../types/socket';
 import { api } from '../src/services/api';
 import ReportGeneratorModal from './ReportGeneratorModal';
+import TranscriptionPanel from './TranscriptionPanel';
 import CollaborativeAnnotation from '../src/oncovision/components/CollaborativeAnnotation';
 import { getToken } from '../src/services/auth';
 
@@ -188,6 +189,8 @@ const VideoCall: React.FC<VideoCallProps> = ({ onLeave, initialMicOn = true, ini
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCollaboration, setShowCollaboration] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
+  const [showTranscription, setShowTranscription] = useState(false);
+  const [transcriptionMounted, setTranscriptionMounted] = useState(false);
   const [autofillStatus, setAutofillStatus] = useState('');
 
   const [audioOutputDevices, setAudioOutputDevices] = useState<MediaDeviceInfo[]>([]);
@@ -1171,6 +1174,19 @@ const VideoCall: React.FC<VideoCallProps> = ({ onLeave, initialMicOn = true, ini
                       </svg>
                       Générer un rapport
                     </button>
+                    <button
+                      onClick={() => {
+                        setShowActionsMenu(false);
+                        setTranscriptionMounted(true);
+                        setShowTranscription(prev => !prev);
+                      }}
+                      className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-white hover:bg-slate-700 transition-colors flex items-center gap-3"
+                    >
+                      <svg className="w-5 h-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-14 0m7 7v4m-4 0h8M12 3a3 3 0 00-3 3v5a3 3 0 006 0V6a3 3 0 00-3-3z" />
+                      </svg>
+                      {showTranscription ? 'Masquer la transcription' : 'Transcription en direct'}
+                    </button>
                   </div>
                 )}
               </div>
@@ -1485,7 +1501,28 @@ const VideoCall: React.FC<VideoCallProps> = ({ onLeave, initialMicOn = true, ini
       <ReportGeneratorModal
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
+        meetingId={meetingId}
       />
+
+      {/* Panneau de transcription en direct (monté à la première ouverture pour conserver l'enregistrement en cours) */}
+      {transcriptionMounted && (
+        <div className={`absolute bottom-28 right-4 z-40 w-[22rem] max-w-[calc(100%-2rem)] ${showTranscription ? '' : 'hidden'}`}>
+          <div className="bg-slate-900/95 border border-slate-700 rounded-2xl shadow-2xl p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-white text-sm font-semibold">Transcription en direct</span>
+              <button
+                onClick={() => setShowTranscription(false)}
+                className="text-slate-400 hover:text-white text-xs px-1"
+                title="Masquer le panneau"
+                aria-label="Masquer le panneau de transcription"
+              >
+                ✕
+              </button>
+            </div>
+            <TranscriptionPanel meetingId={meetingId} onTranscriptChange={setLiveTranscript} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

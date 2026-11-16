@@ -249,6 +249,16 @@ export const api = {
         return response.json();
     },
 
+    updateParticipantVisibility: async (meetingId: string, participantId: string, isVisible: boolean, showProfession: boolean) => {
+        const response = await authFetch(`${API_URL}/meetings/${meetingId}/participants/${participantId}/visibility`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isVisible, showProfession }),
+        });
+        if (!response.ok) throw new Error("Failed to update participant visibility");
+        return response.json();
+    },
+
     removeParticipantFromMeeting: async (meetingId: string, participantId: string) => {
         const response = await authFetch(`${API_URL}/meetings/${meetingId}/participants/${participantId}`, {
             method: "DELETE",

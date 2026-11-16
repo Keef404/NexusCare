@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { api } from '../services/api';
-import {
 import { getToken } from '../services/auth';
+import {
     MessageSquare,
     Users,
     Plus,
