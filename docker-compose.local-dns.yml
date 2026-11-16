@@ -1,0 +1,23 @@
+# Surcharge OPTIONNELLE pour réseau dont le DNS refuse Docker Hub / npm (ex. box qui répond "Query refused").
+# Usage : docker compose -f docker-compose.yml -f docker-compose.local-dns.yml up -d --no-build <services>
+# - force un DNS public dans les conteneurs ;
+# - visio-app : réutilise l'image existante et installe les dépendances au démarrage (pas de rebuild).
+services:
+  visio-app:
+    dns: [8.8.8.8, 1.1.1.1]
+    command: ["sh", "-c", "npm install --no-audit --no-fund && exec npm run dev -- --host 0.0.0.0"]
+    volumes:
+      - ./visio-app/package.json:/app/package.json
+      - ./visio-app/package-lock.json:/app/package-lock.json
+  rest-api:
+    dns: [8.8.8.8, 1.1.1.1]
+  websocket:
+    dns: [8.8.8.8, 1.1.1.1]
+  oncovision-api:
+    dns: [8.8.8.8, 1.1.1.1]
+  generation_rapport:
+    dns: [8.8.8.8, 1.1.1.1]
+  transcription-api:
+    dns: [8.8.8.8, 1.1.1.1]
+  completion-formulaire:
+    dns: [8.8.8.8, 1.1.1.1]

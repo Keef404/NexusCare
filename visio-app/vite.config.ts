@@ -9,21 +9,30 @@ import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // Docker mounts OncoVision/app/src at /app/oncovision-src; fall back to relative path for local dev
-const oncovisionSrc = existsSync('/app/oncovision-src/lib.tsx')
-  ? '/app/oncovision-src/lib.tsx'
-  : resolve(__dirname, '../../OncoVision/app/src/lib.tsx')
+const oncovisionDir = existsSync('/app/oncovision-src/lib.tsx')
+  ? '/app/oncovision-src'
+  : resolve(__dirname, '../OncoVision/app/src')
+const oncovisionSrc = resolve(oncovisionDir, 'lib.tsx')
 
 export default defineConfig({
   plugins: [
     tailwindcss(),
-    react(),
+    react({
+      // OncoVision utilise des décorateurs legacy (@subscribe) dans viewers/socket/canva.tsx
+      babel: {
+        plugins: [['@babel/plugin-proposal-decorators', { legacy: true }]],
+      },
+    }),
     basicSsl()
   ],
   resolve: {
     dedupe: ['react', 'react-dom'],
-    alias: {
-      oncovision: oncovisionSrc,
-    },
+    alias: [
+      // 'oncovision' -> point d'entrée lib.tsx (composants/hook publics)
+      { find: /^oncovision$/, replacement: oncovisionSrc },
+      // 'oncovision-src/...' -> accès direct aux sources (ex: hooks/rest, qui n'est pas exporté par lib.tsx)
+      { find: /^oncovision-src\//, replacement: oncovisionDir + '/' },
+    ],
   },
   server: {
     host: true,
