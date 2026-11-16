@@ -14,6 +14,7 @@ import PreMeeting from './pages/PreMeeting';
 import MeetingCall from './pages/MeetingCall';
 import Profile from './pages/Profile';
 import ReportGenerator from './pages/ReportGenerator';
+import Admin from './pages/Admin';
 
 // Passe par le proxy Vite (même origine) pour éviter CORS/mixed-content.
 const oncovisionApiUrl = import.meta.env.VITE_ONCOVISION_API_URL || window.location.origin;
@@ -52,6 +53,11 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            } />
             <Route path="/" element={
               <ProtectedRoute>
                 <Home />

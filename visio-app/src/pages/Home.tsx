@@ -15,8 +15,10 @@ import {
     ChevronLeft,
     ChevronRight,
     Clock,
+    Shield,
 } from 'lucide-react';
 import { api } from '../services/api';
+import { logout } from '../services/auth';
 
 const Home: React.FC = () => {
     const [user, setUser] = React.useState<any>(null);
@@ -32,8 +34,7 @@ const Home: React.FC = () => {
     }, [navigate]);
 
     const handleLogout = () => {
-        localStorage.removeItem('user');
-        navigate('/login');
+        logout();
     };
 
     const displayUser = user || {
@@ -193,6 +194,17 @@ const Home: React.FC = () => {
                                 )}
                             </div>
                         </div>
+
+                        {user?.isAdmin && (
+                            <Link
+                                to="/admin"
+                                className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl backdrop-blur-xl bg-cyan-500/10 border border-cyan-400/20 text-cyan-300 hover:bg-cyan-500/20 transition-all duration-200 text-sm"
+                                aria-label="Administration"
+                            >
+                                <Shield className="w-4 h-4" />
+                                <span className="hidden md:inline">Administration</span>
+                            </Link>
+                        )}
 
                         <Link
                             to="/profile"

@@ -1,19 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { MeetingsService } from './meetings.service';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { UpdateMeetingDto } from './dto/update-meeting.dto';
 import { MarkFormFilledDto } from './dto/add-patient-record.dto';
-import { AdminOnly } from '../auth/decorators';
+import { AdminOnly, CurrentUser } from '../auth/decorators';
+import type { AuthUser } from '../auth/decorators';
 
 @Controller('meetings')
 export class MeetingsController {
     constructor(private readonly meetingsService: MeetingsService) {}
 
+    /** L'administrateur de la réunion est toujours l'utilisateur authentifié (sauf administrateur plateforme). */
     @Post()
-    create(@Body() createMeetingDto: CreateMeetingDto) {
+    create(@Body() createMeetingDto: CreateMeetingDto, @CurrentUser() me: AuthUser) {
+        if (!me.isAdmin) createMeetingDto.roomAdmin = me.id;
         return this.meetingsService.create(createMeetingDto);
+    }
+
+    /** Seul l'administrateur de la réunion (ou un administrateur plateforme) peut la modifier. */
+    private async assertRoomAdmin(meetingId: string, me: AuthUser) {
+        const meeting: any = await this.meetingsService.findOne(meetingId);
+        if (!meeting) throw new NotFoundException('Réunion introuvable');
+        const roomAdminId = meeting.roomAdminId ?? meeting.roomAdmin?.id;
+        if (roomAdminId !== me.id && !me.isAdmin) {
+            throw new ForbiddenException("Seul l'administrateur de la réunion peut effectuer cette action");
+        }
     }
 
     @Get()
@@ -53,16 +66,19 @@ export class MeetingsController {
     }
 
     @Patch(':id')
-    update(
+    async update(
         @Param('id') id: string,
         @Body() updateMeetingDto: UpdateMeetingDto,
-        @Query('requesterId') requesterId?: string
+        @CurrentUser() me: AuthUser,
+        @Query('requesterId') _requesterId?: string
     ) {
-        return this.meetingsService.update(id, updateMeetingDto, requesterId);
+        await this.assertRoomAdmin(id, me);
+        return this.meetingsService.update(id, updateMeetingDto, me.isAdmin ? undefined : me.id);
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string) {
+    async remove(@Param('id') id: string, @CurrentUser() me: AuthUser) {
+        await this.assertRoomAdmin(id, me);
         return this.meetingsService.remove(id);
     }
 
@@ -95,23 +111,28 @@ export class MeetingsController {
     }
 
     @Patch(':id/cancel')
-    cancelMeeting(@Param('id') id: string) {
+    async cancelMeeting(@Param('id') id: string, @CurrentUser() me: AuthUser) {
+        await this.assertRoomAdmin(id, me);
         return this.meetingsService.cancelMeeting(id);
     }
 
     @Post(':id/participants')
-    addParticipant(
+    async addParticipant(
         @Param('id') id: string,
-        @Body() body: { participantId: string; professionId: string }
+        @Body() body: { participantId: string; professionId: string },
+        @CurrentUser() me: AuthUser
     ) {
+        await this.assertRoomAdmin(id, me);
         return this.meetingsService.addParticipant(id, body.participantId, body.professionId);
     }
 
     @Delete(':id/participants/:participantId')
-    removeParticipant(
+    async removeParticipant(
         @Param('id') id: string,
-        @Param('participantId') participantId: string
+        @Param('participantId') participantId: string,
+        @CurrentUser() me: AuthUser
     ) {
+        if (participantId !== me.id) await this.assertRoomAdmin(id, me); // on peut toujours quitter une réunion soi-même
         return this.meetingsService.removeParticipant(id, participantId);
     }
 
@@ -125,11 +146,13 @@ export class MeetingsController {
     }
 
     @Patch(':id/participants/:participantId/visibility')
-    updateParticipantVisibility(
+    async updateParticipantVisibility(
         @Param('id') id: string,
         @Param('participantId') participantId: string,
-        @Body() body: { isVisible: boolean; showProfession?: boolean }
+        @Body() body: { isVisible: boolean; showProfession?: boolean },
+        @CurrentUser() me: AuthUser
     ) {
+        await this.assertRoomAdmin(id, me);
         return this.meetingsService.updateParticipantVisibility(
             id, 
             participantId, 

@@ -55,6 +55,61 @@ export const api = {
         return response.json();
     },
 
+    // ---- EPIC 8 : administration ----
+    createProfession: async (data: { name: string; description?: string; color?: string; isActive?: boolean }) => {
+        const response = await authFetch(`${API_URL}/professions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error("Impossible de créer la spécialité");
+        return response.json();
+    },
+
+    updateProfession: async (id: string, data: { name?: string; description?: string; color?: string; isActive?: boolean }) => {
+        const response = await authFetch(`${API_URL}/professions/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error("Impossible de modifier la spécialité");
+        return response.json();
+    },
+
+    deleteProfession: async (id: string) => {
+        const response = await authFetch(`${API_URL}/professions/${id}`, { method: "DELETE" });
+        if (!response.ok) throw new Error("Impossible de supprimer la spécialité (utilisée ?)");
+        return response.json().catch(() => ({}));
+    },
+
+    deleteUser: async (id: string) => {
+        const response = await authFetch(`${API_URL}/users/${id}`, { method: "DELETE" });
+        if (!response.ok) throw new Error("Impossible de supprimer l'utilisateur");
+        return response.json().catch(() => ({}));
+    },
+
+    getAllGroups: async () => {
+        const response = await authFetch(`${API_URL}/groups`);
+        if (!response.ok) throw new Error("Impossible de charger les groupes");
+        return response.json();
+    },
+
+    updateGroup: async (id: string, data: { name: string }) => {
+        const response = await authFetch(`${API_URL}/groups/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error("Impossible de renommer le groupe");
+        return response.json();
+    },
+
+    deleteGroup: async (id: string) => {
+        const response = await authFetch(`${API_URL}/groups/${id}`, { method: "DELETE" });
+        if (!response.ok) throw new Error("Impossible de supprimer le groupe");
+        return response.json();
+    },
+
     getPatientRecords: async () => {
         const response = await authFetch(`${API_URL}/patient-records`);
         if (!response.ok) throw new Error("Failed to fetch patient records");
